@@ -11,6 +11,7 @@ use Hashids\Hashids;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 
 class basicController extends Controller
@@ -119,21 +120,59 @@ class basicController extends Controller
             ]);
         }
     }
+    
     public function show(Request $req)
     {
         $search = $req->search;
-        $data = Test::with('image')->where('role',1)->latest();
-        if($search){
-            $data = $data->where('fname','like','%'.$search.'%');
+        $dateFilter = $req->date_filter;
+        
+        $data = Test::with('image')->where('role', 1)->latest();
+    
+        // Search by name
+        if ($search) {
+            $data->where('fname', 'like', '%' . $search . '%');
         }
+    
+        // Date Filters
+        if ($dateFilter) {
+            switch ($dateFilter) {
+                case 'today':
+                    $data->whereDate('created_at', Carbon::today());
+                    break;
+                case 'yesterday':
+                    $data->whereDate('created_at', Carbon::yesterday());
+                    break;
+                case 'this_week':
+                    $data->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                    break;
+                case 'last_week':
+                    $data->whereBetween('created_at', [Carbon::now()->subWeek()->startOfWeek(), Carbon::now()->subWeek()->endOfWeek()]);
+                    break;
+                case 'this_month':
+                    $data->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+                    break;
+                case 'last_month':
+                    $data->whereBetween('created_at', [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()]);
+                    break;
+                case 'this_year':
+                    $data->whereYear('created_at', Carbon::now()->year);
+                    break;
+                case 'last_year':
+                    $data->whereYear('created_at', Carbon::now()->subYear()->year);
+                    break;
+            }
+        }
+    
         $data = $data->paginate(5);
+    
         foreach ($data as $dat) {
             $languages = explode(',', $dat->description);
             $dat->description = Language::whereIn('id', $languages)->pluck('name');
         }
-        // dd($data);
+    
         return view('basic.list', ['data' => $data]);
     }
+    
 
     public function edit($id)
     {

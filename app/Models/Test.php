@@ -25,4 +25,5 @@ class Test extends Authenticatable
         return $this->hasMany(Image::class);
     }
 }
+// $products = Product::where('price', '<=', 500)->take(10)->get();
 

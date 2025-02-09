@@ -119,9 +119,14 @@ class basicController extends Controller
             ]);
         }
     }
-    public function show()
+    public function show(Request $req)
     {
-        $data = Test::with('image')->latest()->paginate(5);
+        $search = $req->search;
+        $data = Test::with('image')->where('role',1)->latest();
+        if($search){
+            $data = $data->where('fname','like','%'.$search.'%');
+        }
+        $data = $data->paginate(5);
         foreach ($data as $dat) {
             $languages = explode(',', $dat->description);
             $dat->description = Language::whereIn('id', $languages)->pluck('name');

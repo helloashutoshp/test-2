@@ -3,6 +3,11 @@
     <div class="container">
         <a href="{{route('logout')}}" class="href">logout</a>
         <table class="table">
+            <form action="" method="get">
+                <input type="text" value = "{{Request::get('search')}}" id="search" name="search">
+                <button type="submit">Search</button>
+            </form>
+            <a href="{{route('show')}}" class="btn btn-secondary">Reset</a>
             <thead>
                 <tr>
                     <th scope="col">Sl No</th>
@@ -14,7 +19,6 @@
                     <th scope="col">Language</th>
                     <th scope="col">Image</th>
                     <th scope="col">Action</th>
-
                 </tr>
             </thead>
             <tbody>
